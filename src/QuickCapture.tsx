@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import { getCurrentWindow } from "@tauri-apps/api/window";
+import { listen } from "@tauri-apps/api/event";
 import "./QuickCapture.css";
 
 interface RecentNote {
@@ -12,18 +13,57 @@ interface RecentNote {
 function QuickCapture() {
   const [input, setInput] = useState("");
   const [recentNotes, setRecentNotes] = useState<RecentNote[]>([]);
+  const [currentNote, setCurrentNote] = useState("");
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     loadRecentNotes();
-    // Focus the input when the window opens
-    setTimeout(() => {
-      const inputElement = document.querySelector('input');
+    loadCurrentNote();
+    
+    // Listen for note updates from other windows
+    const unlistenNoteUpdate = listen<string>("note-updated", (event) => {
+      setCurrentNote(event.payload);
+      loadRecentNotes(); // Refresh recent notes as well
+    });
+
+    // Listen for window focus to reload current note
+    const window = getCurrentWindow();
+    const unlistenFocus = window.listen("tauri://focus", () => {
+      loadCurrentNote();
+      loadRecentNotes();
+    });
+
+    // Focus the input when the window opens - more robust approach
+    const focusInput = () => {
+      const inputElement = document.querySelector('input') as HTMLInputElement;
       if (inputElement) {
         inputElement.focus();
+        inputElement.select(); // Select any existing text
       }
-    }, 100);
+    };
+    
+    // Try multiple times to ensure focus works
+    const timeouts = [50, 150, 300];
+    timeouts.forEach(delay => {
+      setTimeout(focusInput, delay);
+    });
+
+    return () => {
+      unlistenNoteUpdate.then(f => f());
+      unlistenFocus.then(f => f());
+    };
   }, []);
+
+  async function loadCurrentNote() {
+    try {
+      const todayNote = await invoke<string>("get_current_note_from_state");
+      setCurrentNote(todayNote);
+    } catch (error) {
+      console.error("Failed to load today's note:", error);
+      // Fallback to empty string if there's an error
+      setCurrentNote("");
+    }
+  }
 
   async function loadRecentNotes() {
     try {
@@ -41,8 +81,13 @@ function QuickCapture() {
     if (input.trim()) {
       try {
         await invoke("append_to_today_note", { content: input.trim() });
+        
+        // Reload current note to reflect the changes immediately
+        await loadCurrentNote();
+        
         // Reload recent notes to show the new entry
         await loadRecentNotes();
+        
         // Clear input and close window
         setInput("");
         setTimeout(async () => {
@@ -64,6 +109,8 @@ function QuickCapture() {
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === 'Escape') {
+        event.preventDefault();
+        setInput(""); // Clear input first
         closeWindow();
       } else if (event.key === 'Enter' && !event.shiftKey) {
         event.preventDefault();
@@ -73,7 +120,7 @@ function QuickCapture() {
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [input]);
+  }, [input]); // Add input dependency
 
   const formatDate = (dateStr: string) => {
     const date = new Date(dateStr);
@@ -120,16 +167,39 @@ function QuickCapture() {
           />
         </div>
 
+        {/* Today's Note Preview (Read-only) - Shows the same data as main window */}
+        <div className="current-note-preview">
+          <div className="current-note-title">Heutige Notizen (Read-Only)</div>
+          <div className="current-note-content">
+            {currentNote ? (
+              currentNote.split('\n').map((line, index) => {
+                const { time, content } = extractTimeFromLine(line);
+                return (
+                  <div key={index} className="note-line">
+                    {time && <span className="note-time">{time}</span>}
+                    <span className="note-content">
+                      {content || line}
+                    </span>
+                  </div>
+                );
+              })
+            ) : (
+              <div className="note-line empty">Noch keine Notizen für heute</div>
+            )}
+          </div>
+        </div>
+
         <div className="recent-notes">
-          <div className="recent-notes-title">Letzte 48 Stunden</div>
+          <div className="recent-notes-title">Gestern</div>
           {isLoading ? (
             <div className="loading">Lade Notizen...</div>
           ) : (
             <div className="notes-list">
               {recentNotes.length === 0 ? (
-                <div className="no-notes">Noch keine Notizen vorhanden</div>
+                <div className="no-notes">Keine gestrigen Notizen vorhanden</div>
               ) : (
-                recentNotes.map((note) => (
+                // Only show yesterday's notes (skip today which is index 0)
+                recentNotes.slice(1).map((note) => (
                   <div key={note.date} className="note-group">
                     <div className="note-date">{formatDate(note.date)}</div>
                     <div className="note-lines">
@@ -158,7 +228,7 @@ function QuickCapture() {
 
         <div className="quick-capture-footer">
           <span className="footer-hint">
-            ⏎ Speichern • ⎋ Schließen
+            ⏎ Speichern • ⎋ Schließen • Bearbeiten nur im Hauptfenster
           </span>
         </div>
       </div>

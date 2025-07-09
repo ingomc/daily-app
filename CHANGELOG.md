@@ -5,6 +5,26 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.5.0] - 2025-07-09
+
+### Fixed
+- **Real-time Synchronization**: Fixed major bug where Quick Capture modal wouldn't show the latest notes after reopening
+- **State Management**: Enhanced shared state management to ensure both windows always display the same, up-to-date content
+- **Window Focus Events**: Added proper focus listeners to reload current note when windows become visible
+- **Data Consistency**: Both main window and Quick Capture now use the same state-based data source
+
+### Improved
+- **Minimal UI Design**: Removed gradients and glassmorphism effects for a cleaner, more minimal appearance
+- **Performance**: Optimized note loading with intelligent state caching and automatic refresh
+- **User Experience**: Enhanced autofocus behavior in Quick Capture for better keyboard navigation
+- **History Display**: Quick Capture history now only shows yesterday's notes, with today's note in the preview section
+
+### Technical
+- **Enhanced Backend**: Improved `get_current_note_from_state` command with automatic state initialization and date validation
+- **Event-Driven Architecture**: Robust event emission and listening for real-time updates across all windows
+- **Window Lifecycle**: Better handling of window show/hide cycles with proper state refresh
+- **Error Handling**: Improved fallback mechanisms for state loading and synchronization
+
 ## [0.4.0] - 2025-07-09
 
 ### Added

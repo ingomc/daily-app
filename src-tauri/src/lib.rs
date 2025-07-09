@@ -1,12 +1,20 @@
 use chrono::Local;
 use std::fs;
 use std::path::PathBuf;
+use std::sync::Mutex;
 use tauri::{
     menu::{MenuBuilder, MenuItemBuilder},
     tray::{MouseButton, MouseButtonState, TrayIconBuilder, TrayIconEvent},
-    AppHandle, Manager, WebviewWindow,
+    AppHandle, Manager, WebviewWindow, Emitter,
 };
 use tauri_plugin_positioner::{WindowExt, Position};
+
+// Shared application state
+#[derive(Default, Clone, serde::Serialize)]
+struct AppState {
+    current_note: String,
+    current_date: String,
+}
 
 // Learn more about Tauri commands at https://tauri.app/develop/calling-rust/
 #[tauri::command]
@@ -34,11 +42,21 @@ fn get_today_note(app_handle: AppHandle) -> Result<String, String> {
     let notes_dir = get_notes_dir(&app_handle)?;
     let note_file = notes_dir.join(format!("{}.txt", today));
 
-    if note_file.exists() {
-        fs::read_to_string(note_file).map_err(|e| e.to_string())
+    let content = if note_file.exists() {
+        fs::read_to_string(note_file).map_err(|e| e.to_string())?
     } else {
-        Ok(String::new())
+        String::new()
+    };
+
+    // Update shared state
+    if let Some(state) = app_handle.try_state::<Mutex<AppState>>() {
+        if let Ok(mut state_guard) = state.lock() {
+            state_guard.current_note = content.clone();
+            state_guard.current_date = today;
+        }
     }
+
+    Ok(content)
 }
 
 #[tauri::command]
@@ -46,7 +64,24 @@ fn save_today_note(content: String, app_handle: AppHandle) -> Result<(), String>
     let today = Local::now().format("%Y-%m-%d").to_string();
     let notes_dir = get_notes_dir(&app_handle)?;
     let note_file = notes_dir.join(format!("{}.txt", today));
-    fs::write(note_file, content).map_err(|e| e.to_string())
+    fs::write(note_file, &content).map_err(|e| e.to_string())?;
+
+    // Update shared state and notify all windows
+    if let Some(state) = app_handle.try_state::<Mutex<AppState>>() {
+        if let Ok(mut state_guard) = state.lock() {
+            state_guard.current_note = content.clone();
+            state_guard.current_date = today;
+        }
+    }
+
+    // Emit event to all windows about the note update with the full content
+    let _ = app_handle.emit("note-updated", &content);
+    
+    // Also emit to specific windows to ensure delivery
+    let _ = app_handle.emit_to("main", "note-updated", &content);
+    let _ = app_handle.emit_to("quick-capture", "note-updated", &content);
+
+    Ok(())
 }
 
 #[tauri::command]
@@ -151,7 +186,55 @@ fn append_to_today_note(content: String, app_handle: AppHandle) -> Result<(), St
         format!("{}\n{}", existing_content, new_line)
     };
     
-    fs::write(note_file, updated_content).map_err(|e| e.to_string())
+    fs::write(note_file, &updated_content).map_err(|e| e.to_string())?;
+
+    // Update shared state and notify all windows
+    if let Some(state) = app_handle.try_state::<Mutex<AppState>>() {
+        if let Ok(mut state_guard) = state.lock() {
+            state_guard.current_note = updated_content.clone();
+            state_guard.current_date = today;
+        }
+    }
+
+    // Emit event to all windows about the note update with the full content
+    let _ = app_handle.emit("note-updated", &updated_content);
+    
+    // Also emit to specific windows to ensure delivery
+    let _ = app_handle.emit_to("main", "note-updated", &updated_content);
+    let _ = app_handle.emit_to("quick-capture", "note-updated", &updated_content);
+
+    Ok(())
+}
+
+#[tauri::command]
+fn get_current_note_from_state(app_handle: AppHandle) -> Result<String, String> {
+    let today = Local::now().format("%Y-%m-%d").to_string();
+    
+    if let Some(state) = app_handle.try_state::<Mutex<AppState>>() {
+        if let Ok(mut state_guard) = state.lock() {
+            // If state is empty or for a different date, load from file
+            if state_guard.current_note.is_empty() || state_guard.current_date != today {
+                match get_today_note(app_handle.clone()) {
+                    Ok(note_content) => {
+                        state_guard.current_note = note_content.clone();
+                        state_guard.current_date = today;
+                        return Ok(note_content);
+                    },
+                    Err(_) => {
+                        // No note file exists yet, initialize with empty content
+                        state_guard.current_note = String::new();
+                        state_guard.current_date = today;
+                        return Ok(String::new());
+                    }
+                }
+            } else {
+                return Ok(state_guard.current_note.clone());
+            }
+        }
+    }
+    
+    // Fallback to loading from file if state is not available
+    get_today_note(app_handle)
 }
 
 #[derive(serde::Serialize)]
@@ -166,8 +249,8 @@ fn get_recent_notes(app_handle: AppHandle) -> Result<Vec<RecentNote>, String> {
     let notes_dir = get_notes_dir(&app_handle)?;
     let mut recent_notes = Vec::new();
     
-    // Get the last 2 days including today
-    for i in 0..2 {
+    // Get only yesterday's note (skip today)
+    for i in 1..3 {  // Start from 1 to skip today, get 2 previous days
         let date = Local::now() - chrono::Duration::days(i);
         let date_str = date.format("%Y-%m-%d").to_string();
         let note_file = notes_dir.join(format!("{}.txt", date_str));
@@ -200,7 +283,8 @@ fn show_quick_capture_window(app_handle: AppHandle) -> Result<(), String> {
         return Ok(());
     }
 
-    // Create new quick capture window
+    // If the window doesn't exist, it means it wasn't created in the config
+    // In Tauri 2.x, we need to create it manually if not in config
     use tauri::{WebviewWindowBuilder, WebviewUrl};
     
     WebviewWindowBuilder::new(
@@ -209,13 +293,13 @@ fn show_quick_capture_window(app_handle: AppHandle) -> Result<(), String> {
         WebviewUrl::App("quick-capture.html".into())
     )
     .title("Quick Capture")
-    .inner_size(600.0, 400.0)
-    .min_inner_size(600.0, 300.0)
+    .inner_size(680.0, 440.0)
+    .min_inner_size(680.0, 340.0)
     .max_inner_size(800.0, 600.0)
     .resizable(false)
     .fullscreen(false)
     .decorations(false)
-    .shadow(true)
+    .shadow(false)
     .always_on_top(true)
     .center()
     .build()
@@ -272,6 +356,9 @@ pub fn run() {
         .plugin(tauri_plugin_opener::init())
         .setup(|app| {
             println!("App setup complete with shortcuts initialized!");
+            
+            // Initialize shared state
+            app.manage(Mutex::new(AppState::default()));
             
             // Create tray menu
             let quit_item = MenuItemBuilder::with_id("quit", "Quit").build(app)?;
@@ -355,6 +442,7 @@ pub fn run() {
         .invoke_handler(tauri::generate_handler![
             greet,
             get_today_note,
+            get_current_note_from_state,
             save_today_note,
             position_window_to_tray,
             show_and_position_window,

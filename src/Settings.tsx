@@ -12,7 +12,7 @@ function Settings() {
     setTimeout(() => setIsVisible(true), 100);
   }, []);
 
-  const appVersion = "0.4.0";
+  const appVersion = "0.5.0";
   const authorName = "Andre Bellmann";
   const authorEmail = "andre@andre-bellmann.de";
   const websiteUrl = "https://andre-bellmann.de";

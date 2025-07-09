@@ -1,4 +1,4 @@
-# Daily App v0.4.0
+# Daily App v0.5.0
 
 Eine minimalistische macOS-Menüleisten-App für tägliche Standup-Notizen, gebaut mit Tauri (React + Rust).
 
@@ -8,11 +8,12 @@ Eine minimalistische macOS-Menüleisten-App für tägliche Standup-Notizen, geba
 ✅ **Tägliche Notizen** - Automatische Datei-Organisation nach Datum (YYYY-MM-DD.txt)  
 ✅ **Auto-Save** - Notizen werden automatisch nach 1 Sekunde gespeichert  
 ✅ **Global Shortcuts** - `Cmd+Shift+N` öffnet/schließt das Fenster, `Cmd+Shift+Space` für Quick Capture  
-✅ **Quick Capture** - Spotlight-ähnlicher Modal für schnelle Notizen mit 48h-Historie  
+✅ **Quick Capture** - Spotlight-ähnlicher Modal für schnelle Notizen mit Historie  
+✅ **Real-time Sync** - Beide Fenster zeigen immer den aktuellen Stand der Notizen  
 ✅ **Settings Window** - Einstellungen mit App-Info, Shortcuts und Links  
 ✅ **Custom Titlebar** - Native macOS-Optik ohne Systemkontrollen  
 ✅ **Smart Positioning** - Fenster positioniert sich automatisch neben dem Tray-Icon  
-✅ **Glasmorphismus UI** - Modernes, transparentes Design mit macOS-Integration  
+✅ **Minimal UI Design** - Sauberes, fokussiertes Design ohne Ablenkungen  
 ✅ **Dark/Light Mode** - Folgt automatisch dem System-Theme  
 ✅ **Tastenkürzel** - ESC zum Schließen, Cmd+S zum Speichern  
 
@@ -24,7 +25,7 @@ Eine minimalistische macOS-Menüleisten-App für tägliche Standup-Notizen, geba
   - `tauri-plugin-global-shortcut` für Tastenkürzel
   - `tauri-plugin-positioner` für Tray-Positionierung
   - `tauri-plugin-opener` für externe Links
-- **Styling**: Natives CSS mit macOS-Glasmorphismus
+- **Styling**: Natives CSS mit minimalistischem macOS-Design
 
 ## Installation 🛠️
 

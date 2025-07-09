@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import { getCurrentWindow } from "@tauri-apps/api/window";
+import { listen } from "@tauri-apps/api/event";
 import "./App.css";
 
 function App() {
@@ -18,16 +19,33 @@ function App() {
 
   useEffect(() => {
     loadTodayNote();
+    
+    // Listen for note updates from other windows (like Quick Capture)
+    const unlistenNoteUpdate = listen<string>("note-updated", (event) => {
+      setNote(event.payload);
+    });
+    
+    // Listen for window focus to reload current note
+    const window = getCurrentWindow();
+    const unlistenFocus = window.listen("tauri://focus", () => {
+      loadTodayNote();
+    });
+    
     // Don't position immediately - let tray handle positioning
     // positionWindowToTray();
     // Trigger fade-in animation
     setTimeout(() => setIsVisible(true), 100);
+
+    return () => {
+      unlistenNoteUpdate.then(f => f());
+      unlistenFocus.then(f => f());
+    };
   }, []);
 
   async function loadTodayNote() {
     try {
       setIsLoading(true);
-      const todayNote = await invoke<string>("get_today_note");
+      const todayNote = await invoke<string>("get_current_note_from_state");
       setNote(todayNote);
     } catch (error) {
       console.error("Failed to load today's note:", error);
@@ -82,7 +100,7 @@ function App() {
     }
   }
 
-  // Auto-save when note changes (with debounce)
+  // Auto-save when note changes (with debounce) and emit update event
   useEffect(() => {
     if (!isLoading && note !== undefined) {
       const timeoutId = setTimeout(() => {
