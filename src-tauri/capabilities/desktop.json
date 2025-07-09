@@ -1,0 +1,22 @@
+{
+  "identifier": "desktop-capability",
+  "platforms": [
+    "macOS",
+    "windows",
+    "linux"
+  ],
+  "windows": [
+    "main",
+    "settings"
+  ],
+  "permissions": [
+    "global-shortcut:default",
+    "positioner:default",
+    "opener:default",
+    "core:window:allow-show",
+    "core:window:allow-hide",
+    "core:window:allow-close",
+    "core:window:allow-start-dragging",
+    "core:window:allow-toggle-maximize"
+  ]
+}
