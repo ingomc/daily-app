@@ -5,6 +5,32 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.6.0] - 2025-07-10
+
+### Added
+- **Quick Capture Animations**: Professional fade-in/fade-out animations for Quick Capture modal
+- **Manual Refresh Button**: Small, unobtrusive reload button (↻) in Quick Capture for manual data refresh
+- **Animation System**: Sophisticated CSS animations with cubic-bezier timing functions
+- **Loading States**: Visual feedback with spinning reload button during data refresh
+- **Dark Mode Support**: Complete dark mode styling for new UI elements
+
+### Improved
+- **User Experience**: Smooth entrance and exit transitions with scale and slide effects
+- **Performance**: Optimized data loading logic with reduced automatic refresh calls
+- **Visual Polish**: Enhanced button interactions with subtle hover animations
+- **Accessibility**: Improved button accessibility with proper hover states and tooltips
+
+### Technical
+- **CSS Architecture**: Modular CSS classes with clear animation keyframes
+- **State Management**: Proper animation state management with React hooks
+- **Animation Timing**: Optimized animations for 60fps smooth experience
+- **Code Quality**: Well-structured animation logic with comprehensive documentation
+
+### Fixed
+- **Animation Cleanup**: Proper cleanup of animation timers and event listeners
+- **Loading Performance**: Removed problematic automatic refresh attempts
+- **UI Consistency**: Unified design language across all interactive elements
+
 ## [0.5.0] - 2025-07-09
 
 ### Fixed

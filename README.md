@@ -1,14 +1,16 @@
-# Daily App v0.5.0
+# Daily App v0.6.0
 
 Eine minimalistische macOS-Menüleisten-App für tägliche Standup-Notizen, gebaut mit Tauri (React + Rust).
 
 ## Features ✨
 
 ✅ **Tray-Only App** - Lebt nur in der Menüleiste, kein Dock-Icon  
-✅ **Tägliche Notizen** - Automatische Datei-Organisation nach Datum (YYYY-MM-DD.txt)  
+✅ **Tägliche Notizen** - Automatische SQLite-Datenbank mit intelligenter Organisation  
 ✅ **Auto-Save** - Notizen werden automatisch nach 1 Sekunde gespeichert  
 ✅ **Global Shortcuts** - `Cmd+Shift+N` öffnet/schließt das Fenster, `Cmd+Shift+Space` für Quick Capture  
-✅ **Quick Capture** - Spotlight-ähnlicher Modal für schnelle Notizen mit Historie  
+✅ **Quick Capture** - Spotlight-ähnlicher Modal für schnelle Notizen mit 48h-Historie  
+✅ **Smooth Animations** - Professionelle Ein-/Ausblend-Animationen für perfekte UX  
+✅ **Manual Refresh** - Kleiner Reload-Button (↻) für manuelle Datenaktualisierung  
 ✅ **Real-time Sync** - Beide Fenster zeigen immer den aktuellen Stand der Notizen  
 ✅ **Settings Window** - Einstellungen mit App-Info, Shortcuts und Links  
 ✅ **Custom Titlebar** - Native macOS-Optik ohne Systemkontrollen  
@@ -21,11 +23,13 @@ Eine minimalistische macOS-Menüleisten-App für tägliche Standup-Notizen, geba
 
 - **Frontend**: React 18 + TypeScript + Vite
 - **Backend**: Rust + Tauri 2.x
+- **Database**: SQLite mit tauri-plugin-sql
 - **Plugins**: 
   - `tauri-plugin-global-shortcut` für Tastenkürzel
   - `tauri-plugin-positioner` für Tray-Positionierung
   - `tauri-plugin-opener` für externe Links
-- **Styling**: Natives CSS mit minimalistischem macOS-Design
+  - `tauri-plugin-sql` für SQLite-Datenbank
+- **Styling**: Natives CSS mit minimalistischem macOS-Design und smooth Animationen
 
 ## Installation 🛠️
 
@@ -55,10 +59,10 @@ npm run tauri build
 
 ### Grundfunktionen
 1. **Öffnen**: Klick auf Tray-Icon oder `Cmd+Shift+N`
-2. **Quick Capture**: `Cmd+Shift+Space` für schnelle Notizen
-3. **Schreiben**: Notizen werden automatisch gespeichert
-4. **Historie**: Quick Capture zeigt letzte 48 Stunden
-5. **Schließen**: ESC-Taste oder Klick auf ×-Button
+2. **Quick Capture**: `Cmd+Shift+Space` für schnelle Notizen mit smooth Animationen
+3. **Schreiben**: Notizen werden automatisch in SQLite-Datenbank gespeichert
+4. **Historie**: Quick Capture zeigt letzte 48 Stunden mit Manual-Refresh-Button
+5. **Schließen**: ESC-Taste mit fade-out Animation
 6. **Settings**: Über Tray-Rechtsklick → "Settings"
 7. **Beenden**: Rechtsklick auf Tray → "Quit"
 
@@ -71,9 +75,10 @@ npm run tauri build
 
 ### Dateispeicherung
 - **Speicherort**: `~/Library/Application Support/com.andre.daily.app/`
-- **Format**: Textdateien mit Namen `YYYY-MM-DD.txt`
-- **Encoding**: UTF-8
+- **Format**: SQLite-Datenbank (`daily-notes.db`)
+- **Struktur**: Normalisierte Datenbankstruktur mit Timestamps
 - **Auto-Save**: Nach 1 Sekunde Inaktivität
+- **CRUD**: Vollständige Create, Read, Update, Delete Operationen
 
 ## Tastenkürzel ⌨️
 
@@ -81,19 +86,31 @@ npm run tauri build
 - `ESC` - Fenster schließen
 - `Cmd+S` - Manuell speichern (optional)
 
-## Dateispeicher 💾
+## Datenbank 💾
 
-Notizen werden gespeichert unter:
+Notizen werden gespeichert in SQLite-Datenbank unter:
 ```
-~/Library/Application Support/com.tauri.daily-app/daily-notes/
-```
-
-Format: `YYYY-MM-DD.txt` (z.B. `2025-07-09.txt`)
-```
-~/Library/Application Support/com.andre.daily.app/daily-notes/
+~/Library/Application Support/com.andre.daily.app/daily-notes.db
 ```
 
-Jede Notiz wird als Textdatei im Format `YYYY-MM-DD.txt` gespeichert.
+**Datenbankschema:**
+```sql
+CREATE TABLE notes (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    content TEXT NOT NULL,
+    created_at TEXT NOT NULL,
+    updated_at TEXT NOT NULL,
+    is_quick_capture BOOLEAN DEFAULT FALSE
+);
+```
+
+## Neue Features in v0.6.0 🆕
+
+- **Smooth Animations**: Professionelle Ein-/Ausblend-Animationen mit CSS keyframes
+- **Manual Refresh**: Kleiner Reload-Button (↻) in Quick Capture für manuelle Datenaktualisierung  
+- **Enhanced UX**: Optimierte Benutzererfahrung mit visueller Feedback-Systemen
+- **Performance**: Reduzierte automatische Refresh-Calls für bessere Batterielaufzeit
+- **Dark Mode**: Vollständige Dark-Mode-Unterstützung für alle neuen UI-Elemente
 
 ## Technologie-Stack
 
