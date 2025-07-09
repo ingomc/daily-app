@@ -225,7 +225,17 @@ function QuickCapture() {
 
         {/* All Notes from last 48h */}
         <div className="recent-notes">
-          <div className="recent-notes-title">Letzte 48h</div>
+          <div className="recent-notes-header">
+            <div className="recent-notes-title">Letzte 48h</div>
+            <button 
+              className="reload-button" 
+              onClick={loadRecentNotes}
+              disabled={isLoading}
+              title="Daten aktualisieren"
+            >
+              {isLoading ? '⟳' : '↻'}
+            </button>
+          </div>
           {isLoading ? (
             <div className="loading">Lade Notizen...</div>
           ) : (

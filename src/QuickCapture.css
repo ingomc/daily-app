@@ -246,9 +246,63 @@ body {
   padding-left: 4px;
 }
 
+.recent-notes-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.reload-button {
+  background: rgba(0, 123, 255, 0.1);
+  color: #007AFF;
+  border: 1px solid rgba(0, 123, 255, 0.2);
+  border-radius: 12px;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  padding: 0;
+}
+
+.reload-button:hover {
+  background: rgba(0, 123, 255, 0.15);
+  transform: translateY(-1px);
+}
+
+.reload-button:active {
+  transform: translateY(0);
+}
+
+.reload-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
 @media (prefers-color-scheme: dark) {
   .recent-notes-title {
     color: #86868b;
+  }
+  
+  .reload-button {
+    background: rgba(10, 132, 255, 0.15);
+    color: #0A84FF;
+    border: 1px solid rgba(10, 132, 255, 0.3);
+  }
+  
+  .reload-button:hover {
+    background: rgba(10, 132, 255, 0.25);
   }
 }
 
