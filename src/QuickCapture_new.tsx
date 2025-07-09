@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
+import { invoke } from "@tauri-apps/api/core";
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import { listen } from "@tauri-apps/api/event";
-import Database from "@tauri-apps/plugin-sql";
 import "./QuickCapture.css";
 
 interface NoteEntry {
@@ -102,19 +102,7 @@ function QuickCapture() {
     try {
       setIsLoading(true);
       console.log("Quick Capture: Loading recent notes...");
-      
-      const db = await Database.load("sqlite:daily-notes.db");
-      
-      // Get notes from last 48 hours
-      const now = new Date();
-      const fortyEightHoursAgo = new Date(now.getTime() - (48 * 60 * 60 * 1000));
-      const cutoffTime = fortyEightHoursAgo.toISOString();
-      
-      const notes = await db.select<NoteEntry[]>(
-        "SELECT id, content, created_at, updated_at, is_quick_capture FROM notes WHERE created_at >= $1 AND content IS NOT NULL AND TRIM(content) != '' ORDER BY created_at DESC LIMIT 50",
-        [cutoffTime]
-      );
-      
+      const notes = await invoke<NoteEntry[]>("get_recent_notes");
       console.log("Quick Capture: Loaded recent notes count:", notes.length);
       setRecentNotes(notes);
     } catch (error) {
@@ -127,14 +115,12 @@ function QuickCapture() {
   async function handleSubmit() {
     if (input.trim()) {
       try {
-        const db = await Database.load("sqlite:daily-notes.db");
-        const now = new Date().toISOString();
-        
-        // Create new quick capture note
-        await db.execute(
-          "INSERT INTO notes (content, created_at, updated_at, is_quick_capture) VALUES ($1, $2, $3, $4)",
-          [input.trim(), now, now, true]
-        );
+        await invoke("create_note", { 
+          request: {
+            content: input.trim(),
+            is_quick_capture: true
+          }
+        });
         
         // Reload recent notes to show the new entry
         await loadRecentNotes();

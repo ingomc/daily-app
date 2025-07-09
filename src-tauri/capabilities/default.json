@@ -16,6 +16,10 @@
     "core:window:allow-set-position",
     "core:window:allow-start-dragging",
     "core:window:allow-center",
-    "opener:default"
+    "opener:default",
+    "sql:allow-load",
+    "sql:allow-select",
+    "sql:allow-execute",
+    "sql:allow-close"
   ]
 }

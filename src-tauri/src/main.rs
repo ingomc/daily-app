@@ -2,5 +2,8 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 fn main() {
-    tauri_app_lib::run()
+    if let Err(e) = tauri_app_lib::run() {
+        eprintln!("Error running application: {}", e);
+        std::process::exit(1);
+    }
 }
