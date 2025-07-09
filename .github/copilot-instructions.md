@@ -1,4 +1,4 @@
-# Copilot Instructions for Daily App v0.6.0
+# Copilot Instructions for Daily App v0.6.1
 
 <!-- Use this file to provide workspace-specific custom instructions to Copilot. For more details, visit https://code.visualstudio.com/docs/copilot/copilot-customization#_use-a-githubcopilotinstructionsmd-file -->
 
@@ -8,7 +8,7 @@ This is a Tauri application for macOS that provides a menu bar note-taking inter
 - **Frontend**: React 18 with TypeScript (Vite build system)
 - **Backend**: Rust with Tauri 2.x framework
 - **UI**: Simple, clean macOS-style design with system tray integration
-- **Version**: 0.6.0
+- **Version**: 0.6.1
 - **Author**: Andre Bellmann (andre@andre-bellmann.de)
 
 ## Key Features

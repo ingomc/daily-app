@@ -5,6 +5,29 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.6.1] - 2025-07-10
+
+### Added
+- **GitHub Actions Workflow**: Automated release build pipeline for CI/CD
+- **Automated Artifact Generation**: DMG and App bundle creation on release/tag push
+- **Manual Release Triggers**: Workflow dispatch for manual builds
+- **Release Management**: Automatic release creation with download instructions
+- **Build Artifacts**: 90-day retention with optimized compression settings
+- **Intel Mac Support**: Optional x86_64 build target for compatibility
+- **Build Summaries**: Comprehensive workflow summaries with file sizes and next steps
+
+### Improved
+- **CI/CD Pipeline**: Production-ready automated build and release process
+- **Release Distribution**: Streamlined artifact distribution via GitHub Actions
+- **Build Documentation**: Automated generation of release notes and build summaries
+- **Developer Experience**: One-click release creation and artifact management
+
+### Technical
+- **GitHub Actions**: Node.js 18 + Rust toolchain setup
+- **Cross-platform**: Apple Silicon primary, Intel optional
+- **Artifact Management**: Automated upload with retention policies
+- **Release Automation**: Smart tag detection and version handling
+
 ## [0.6.0] - 2025-07-10
 
 ### Added

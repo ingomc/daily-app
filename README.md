@@ -1,4 +1,4 @@
-# Daily App v0.6.0
+# Daily App v0.6.1
 
 Eine minimalistische macOS-Menüleisten-App für tägliche Standup-Notizen, gebaut mit Tauri (React + Rust).
 
@@ -104,7 +104,15 @@ CREATE TABLE notes (
 );
 ```
 
-## Neue Features in v0.6.0 🆕
+## Neue Features in v0.6.1 🆕
+
+- **GitHub Actions CI/CD**: Vollautomatisierte Release-Pipeline mit DMG/App-Bundle-Erstellung
+- **One-Click Releases**: Manueller Workflow-Trigger für sofortige Builds
+- **Artifact Management**: 90-Tage Retention mit optimierten Upload-Einstellungen
+- **Intel Mac Support**: Optionale x86_64-Builds für ältere Macs
+- **Release Automation**: Automatische Release-Erstellung mit Download-Anleitungen
+
+## Neue Features in v0.6.0 🔄
 
 - **Smooth Animations**: Professionelle Ein-/Ausblend-Animationen mit CSS keyframes
 - **Manual Refresh**: Kleiner Reload-Button (↻) in Quick Capture für manuelle Datenaktualisierung  
