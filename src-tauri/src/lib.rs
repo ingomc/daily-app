@@ -26,12 +26,13 @@ async fn create_tray_menu(app: &AppHandle) -> Result<(), Box<dyn std::error::Err
         .items(&[&show_notes, &settings, &quit])
         .build()?;
 
-    // Tray icon creation with proper positioner integration
+    // Tray icon creation with proper positioner integration according to Context7
     let _tray = TrayIconBuilder::new()
         .menu(&menu)
         .show_menu_on_left_click(false)
+        .icon(app.default_window_icon().unwrap().clone())
         .on_tray_icon_event(|app, event| {
-            // Handle tray events for positioner plugin
+            // CRITICAL: Handle tray events for positioner plugin FIRST
             tauri_plugin_positioner::on_tray_event(app.app_handle(), &event);
             
             // Handle click events
@@ -44,8 +45,11 @@ async fn create_tray_menu(app: &AppHandle) -> Result<(), Box<dyn std::error::Err
                             let _ = window.show();
                             let _ = window.set_focus();
                             
-                            // Safe positioning - center instead of tray center
-                            let _ = window.move_window(Position::Center);
+                            // Try TrayCenter but with error handling
+                            if let Err(_) = window.move_window(Position::TrayCenter) {
+                                // Fallback to TopRight if TrayCenter fails
+                                let _ = window.move_window(Position::TopRight);
+                            }
                         }
                     }
                 }
@@ -57,8 +61,10 @@ async fn create_tray_menu(app: &AppHandle) -> Result<(), Box<dyn std::error::Err
                     let _ = window.show();
                     let _ = window.set_focus();
                     
-                    // Safe positioning - center instead of tray center
-                    let _ = window.move_window(Position::Center);
+                    // Try TrayCenter with fallback to TopRight
+                    if let Err(_) = window.move_window(Position::TrayCenter) {
+                        let _ = window.move_window(Position::TopRight);
+                    }
                 }
             }
             "settings" => {
@@ -140,8 +146,8 @@ pub fn run() -> Result<(), Box<dyn std::error::Error>> {
                                 } else {
                                     let _ = window.show();
                                     let _ = window.set_focus();
-                                    // Safe positioning with fallback
-                                    let _ = window.move_window(tauri_plugin_positioner::Position::Center);
+                                    // Safe positioning - use TopRight as safer alternative
+                                    let _ = window.move_window(tauri_plugin_positioner::Position::TopRight);
                                 }
                             }
                         } else if shortcut.matches(tauri_plugin_global_shortcut::Modifiers::CONTROL | tauri_plugin_global_shortcut::Modifiers::SHIFT, tauri_plugin_global_shortcut::Code::Space) || 

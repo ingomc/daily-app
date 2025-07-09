@@ -16,6 +16,7 @@ function QuickCapture() {
   const [input, setInput] = useState("");
   const [recentNotes, setRecentNotes] = useState<NoteEntry[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [isClosing, setIsClosing] = useState(false);
 
   useEffect(() => {
     // Load data immediately when window is created
@@ -143,7 +144,7 @@ function QuickCapture() {
         setInput("");
         setTimeout(async () => {
           await closeWindow();
-        }, 300); // Brief delay to see the new note appear
+        }, 100); // Brief delay to see the new note appear
       } catch (error) {
         console.error("Failed to save note:", error);
       }
@@ -151,10 +152,16 @@ function QuickCapture() {
   }
 
   async function closeWindow() {
-    const window = getCurrentWindow();
-    // Just hide the window instead of closing it to preserve transparency settings
-    await window.hide();
-    setInput(""); // Clear input for next time
+    setIsClosing(true);
+    
+    // Wait for exit animation to complete
+    setTimeout(async () => {
+      const window = getCurrentWindow();
+      // Just hide the window instead of closing it to preserve transparency settings
+      await window.hide();
+      setInput(""); // Clear input for next time
+      setIsClosing(false); // Reset state for next opening
+    }, 200); // Match fade-out animation duration
   }
 
   // Handle keyboard shortcuts
@@ -204,8 +211,8 @@ function QuickCapture() {
   };
 
   return (
-    <div className="quick-capture-container">
-      <div className="quick-capture-modal">
+    <div className={`quick-capture-container ${isClosing ? 'fade-out' : ''}`}>
+      <div className={`quick-capture-modal ${isClosing ? 'slide-out' : ''}`}>
         <div className="quick-capture-input">
           <input
             type="text"
