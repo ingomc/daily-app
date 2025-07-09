@@ -1,4 +1,4 @@
-# Daily App v0.2.0
+# Daily App v0.4.0
 
 Eine minimalistische macOS-Menüleisten-App für tägliche Standup-Notizen, gebaut mit Tauri (React + Rust).
 
@@ -7,7 +7,8 @@ Eine minimalistische macOS-Menüleisten-App für tägliche Standup-Notizen, geba
 ✅ **Tray-Only App** - Lebt nur in der Menüleiste, kein Dock-Icon  
 ✅ **Tägliche Notizen** - Automatische Datei-Organisation nach Datum (YYYY-MM-DD.txt)  
 ✅ **Auto-Save** - Notizen werden automatisch nach 1 Sekunde gespeichert  
-✅ **Global Shortcut** - `Cmd+Shift+N` öffnet/schließt das Fenster von überall  
+✅ **Global Shortcuts** - `Cmd+Shift+N` öffnet/schließt das Fenster, `Cmd+Shift+Space` für Quick Capture  
+✅ **Quick Capture** - Spotlight-ähnlicher Modal für schnelle Notizen mit 48h-Historie  
 ✅ **Settings Window** - Einstellungen mit App-Info, Shortcuts und Links  
 ✅ **Custom Titlebar** - Native macOS-Optik ohne Systemkontrollen  
 ✅ **Smart Positioning** - Fenster positioniert sich automatisch neben dem Tray-Icon  
@@ -53,15 +54,19 @@ npm run tauri build
 
 ### Grundfunktionen
 1. **Öffnen**: Klick auf Tray-Icon oder `Cmd+Shift+N`
-2. **Schreiben**: Notizen werden automatisch gespeichert
-3. **Schließen**: ESC-Taste oder Klick auf ×-Button
-4. **Settings**: Über Tray-Rechtsklick → "Settings"
-5. **Beenden**: Rechtsklick auf Tray → "Quit"
+2. **Quick Capture**: `Cmd+Shift+Space` für schnelle Notizen
+3. **Schreiben**: Notizen werden automatisch gespeichert
+4. **Historie**: Quick Capture zeigt letzte 48 Stunden
+5. **Schließen**: ESC-Taste oder Klick auf ×-Button
+6. **Settings**: Über Tray-Rechtsklick → "Settings"
+7. **Beenden**: Rechtsklick auf Tray → "Quit"
 
 ### Tastenkürzel
 - `Cmd+Shift+N` - App öffnen/schließen (global)
+- `Cmd+Shift+Space` - Quick Capture Modal öffnen (global)
 - `ESC` - Fenster schließen
 - `Cmd+S` - Notizen manuell speichern
+- `Enter` - Notiz in Quick Capture speichern
 
 ### Dateispeicherung
 - **Speicherort**: `~/Library/Application Support/com.andre.daily.app/`

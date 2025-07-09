@@ -14,6 +14,7 @@ export default defineConfig(async () => ({
       input: {
         main: path.resolve(process.cwd(), 'index.html'),
         settings: path.resolve(process.cwd(), 'settings.html'),
+        'quick-capture': path.resolve(process.cwd(), 'quick-capture.html'),
       },
     },
   },

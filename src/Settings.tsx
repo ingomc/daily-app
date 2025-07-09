@@ -12,7 +12,7 @@ function Settings() {
     setTimeout(() => setIsVisible(true), 100);
   }, []);
 
-  const appVersion = "0.2.0";
+  const appVersion = "0.4.0";
   const authorName = "Andre Bellmann";
   const authorEmail = "andre@andre-bellmann.de";
   const websiteUrl = "https://andre-bellmann.de";
@@ -36,15 +36,14 @@ function Settings() {
   async function openWebsite() {
     try {
       console.log("Opening website:", websiteUrl);
-      // Try the invoke command first as it's more reliable
-      await invoke("open_url", { url: websiteUrl });
+      await openUrl(websiteUrl);
     } catch (error) {
-      console.error("Failed to open website via invoke:", error);
-      // Fallback: try the plugin method
+      console.error("Failed to open website:", error);
+      // Fallback for macOS
       try {
-        await openUrl(websiteUrl);
+        await invoke("open_url", { url: websiteUrl });
       } catch (fallbackError) {
-        console.error("Plugin method also failed:", fallbackError);
+        console.error("Fallback method also failed:", fallbackError);
         alert("Could not open website. Please visit https://andre-bellmann.de manually.");
       }
     }
@@ -104,12 +103,20 @@ function Settings() {
               <span className="shortcut-desc">Show/Hide App (Global)</span>
             </div>
             <div className="shortcut-item">
+              <span className="shortcut-key">⌘ + Shift + Space</span>
+              <span className="shortcut-desc">Quick Capture (Global)</span>
+            </div>
+            <div className="shortcut-item">
               <span className="shortcut-key">⌘ + S</span>
               <span className="shortcut-desc">Save Note (Manual)</span>
             </div>
             <div className="shortcut-item">
               <span className="shortcut-key">ESC</span>
               <span className="shortcut-desc">Close Window</span>
+            </div>
+            <div className="shortcut-item">
+              <span className="shortcut-key">Enter</span>
+              <span className="shortcut-desc">Save in Quick Capture</span>
             </div>
           </div>
         </section>
@@ -121,6 +128,10 @@ function Settings() {
             <div className="feature-item">
               <span className="feature-icon">📝</span>
               <span>Daily notes automatically saved per day</span>
+            </div>
+            <div className="feature-item">
+              <span className="feature-icon">⚡</span>
+              <span>Quick Capture modal with 48h history</span>
             </div>
             <div className="feature-item">
               <span className="feature-icon">💾</span>

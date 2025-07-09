@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import { getCurrentWindow } from "@tauri-apps/api/window";
-import { register } from "@tauri-apps/plugin-global-shortcut";
 import "./App.css";
 
 function App() {
@@ -23,25 +22,7 @@ function App() {
     // positionWindowToTray();
     // Trigger fade-in animation
     setTimeout(() => setIsVisible(true), 100);
-    
-    // Register global shortcut
-    registerGlobalShortcut();
   }, []);
-
-  async function registerGlobalShortcut() {
-    try {
-      await register('cmd+shift+n', async (event) => {
-        if (event.state === 'Pressed') {
-          await invoke("toggle_window_visibility");
-        }
-      });
-      console.log('Global shortcut registered: Cmd+Shift+N');
-    } catch (error) {
-      console.warn('Failed to register global shortcut:', error);
-    }
-  }
-
-
 
   async function loadTodayNote() {
     try {
@@ -80,10 +61,6 @@ function App() {
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [note]);
-
-  async function closeWindow() {
-    getCurrentWindow().hide();
-  }
 
   async function openSettings() {
     try {
@@ -138,13 +115,6 @@ function App() {
             ⚙️
           </button>
           <span className="titlebar-title">Daily Notes</span>
-          <button 
-            className="titlebar-close" 
-            onClick={closeWindow}
-            type="button"
-          >
-            ×
-          </button>
         </div>
       </div>
 
@@ -157,27 +127,21 @@ function App() {
           <textarea
             value={note}
             onChange={(e) => setNote(e.target.value)}
-            placeholder={`Was hast du heute gemacht? (${today})
+            placeholder={`Was hast du heute gemacht?
 
-Beispiele:
 • Daily Standup vorbereitet
 • Feature XY implementiert
 • Meeting mit Team ABC
 • Code Review durchgeführt
-• Bug in Komponente Y behoben
-• Dokumentation aktualisiert
 
-Tastenkürzel:
-ESC - Fenster schließen
-⌘+S - Speichern (automatisch)
-⌘+Shift+N - Öffnen/Schließen (global)`}
+ESC - Schließen • ⌘+S - Speichern • ⌘+Shift+Space - Quick Capture`}
             rows={15}
             autoFocus
           />
         </div>
         
         <div className="footer">
-          <small>Automatisch gespeichert • ⌘+Shift+N zum Öffnen • v0.2.0</small>
+          <small>Auto-save • ESC schließen • ⌘+Shift+Space Quick Capture • v0.4.0</small>
         </div>
       </div>
     </div>

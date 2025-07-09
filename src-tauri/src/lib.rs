@@ -130,31 +130,140 @@ async fn open_url(url: String) -> Result<(), String> {
     }
 }
 
+#[tauri::command]
+fn append_to_today_note(content: String, app_handle: AppHandle) -> Result<(), String> {
+    let today = Local::now().format("%Y-%m-%d").to_string();
+    let notes_dir = get_notes_dir(&app_handle)?;
+    let note_file = notes_dir.join(format!("{}.txt", today));
+    
+    let existing_content = if note_file.exists() {
+        fs::read_to_string(&note_file).map_err(|e| e.to_string())?
+    } else {
+        String::new()
+    };
+    
+    let timestamp = Local::now().format("%H:%M").to_string();
+    let new_line = format!("[{}] {}", timestamp, content);
+    
+    let updated_content = if existing_content.is_empty() {
+        new_line
+    } else {
+        format!("{}\n{}", existing_content, new_line)
+    };
+    
+    fs::write(note_file, updated_content).map_err(|e| e.to_string())
+}
+
+#[derive(serde::Serialize)]
+struct RecentNote {
+    date: String,
+    content: String,
+    lines: Vec<String>,
+}
+
+#[tauri::command]
+fn get_recent_notes(app_handle: AppHandle) -> Result<Vec<RecentNote>, String> {
+    let notes_dir = get_notes_dir(&app_handle)?;
+    let mut recent_notes = Vec::new();
+    
+    // Get the last 2 days including today
+    for i in 0..2 {
+        let date = Local::now() - chrono::Duration::days(i);
+        let date_str = date.format("%Y-%m-%d").to_string();
+        let note_file = notes_dir.join(format!("{}.txt", date_str));
+        
+        if note_file.exists() {
+            let content = fs::read_to_string(note_file).map_err(|e| e.to_string())?;
+            let lines: Vec<String> = content
+                .lines()
+                .map(|line| line.to_string())
+                .filter(|line| !line.trim().is_empty())
+                .collect();
+            
+            recent_notes.push(RecentNote {
+                date: date_str,
+                content,
+                lines,
+            });
+        }
+    }
+    
+    Ok(recent_notes)
+}
+
+#[tauri::command]
+fn show_quick_capture_window(app_handle: AppHandle) -> Result<(), String> {
+    // Check if quick capture window already exists
+    if let Some(window) = app_handle.get_webview_window("quick-capture") {
+        window.show().map_err(|e| e.to_string())?;
+        window.set_focus().map_err(|e| e.to_string())?;
+        return Ok(());
+    }
+
+    // Create new quick capture window
+    use tauri::{WebviewWindowBuilder, WebviewUrl};
+    
+    WebviewWindowBuilder::new(
+        &app_handle,
+        "quick-capture",
+        WebviewUrl::App("quick-capture.html".into())
+    )
+    .title("Quick Capture")
+    .inner_size(600.0, 400.0)
+    .min_inner_size(600.0, 300.0)
+    .max_inner_size(800.0, 600.0)
+    .resizable(false)
+    .fullscreen(false)
+    .decorations(false)
+    .shadow(true)
+    .always_on_top(true)
+    .center()
+    .build()
+    .map_err(|e| e.to_string())?;
+
+    Ok(())
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
         .plugin(tauri_plugin_positioner::init())
         .plugin(
             tauri_plugin_global_shortcut::Builder::new()
-                .with_shortcuts(["cmd+shift+n"])
+                .with_shortcuts(["cmd+shift+n", "cmd+shift+space"])
+                .map_err(|e| {
+                    eprintln!("Failed to register shortcuts: {}", e);
+                    e
+                })
                 .unwrap()
-                .with_handler(|app, _shortcut, event| {
+                .with_handler(|app, shortcut, event| {
                     if event.state == tauri_plugin_global_shortcut::ShortcutState::Pressed {
-                        // Toggle window visibility
-                        if let Some(window) = app.get_webview_window("main") {
-                            if window.is_visible().unwrap_or(false) {
-                                let _ = window.hide();
-                            } else {
-                                // Try tray positioning first, fallback to center
-                                match window.move_window(Position::TrayBottomRight) {
-                                    Ok(_) => {},
-                                    Err(_) => {
-                                        let _ = window.center();
+                        // Parse shortcut manually since ID matching is unreliable
+                        let shortcut_str = format!("{:?}", shortcut).to_lowercase();
+                        println!("Global shortcut pressed: {}", shortcut_str);
+                        
+                        if shortcut_str.contains("cmd+shift+n") || shortcut_str.contains("cmd") && shortcut_str.contains("shift") && shortcut_str.contains("n") {
+                            println!("Handling Cmd+Shift+N");
+                            // Toggle main window visibility
+                            if let Some(window) = app.get_webview_window("main") {
+                                if window.is_visible().unwrap_or(false) {
+                                    let _ = window.hide();
+                                } else {
+                                    // Try tray positioning first, fallback to center
+                                    match window.move_window(Position::TrayBottomRight) {
+                                        Ok(_) => {},
+                                        Err(_) => {
+                                            let _ = window.center();
+                                        }
                                     }
+                                    let _ = window.show();
+                                    let _ = window.set_focus();
                                 }
-                                let _ = window.show();
-                                let _ = window.set_focus();
                             }
+                        } else if shortcut_str.contains("cmd+shift+space") || shortcut_str.contains("space") {
+                            println!("Handling Cmd+Shift+Space");
+                            // Show quick capture window
+                            let _ = show_quick_capture_window(app.clone());
                         }
                     }
                 })
@@ -162,6 +271,8 @@ pub fn run() {
         )
         .plugin(tauri_plugin_opener::init())
         .setup(|app| {
+            println!("App setup complete with shortcuts initialized!");
+            
             // Create tray menu
             let quit_item = MenuItemBuilder::with_id("quit", "Quit").build(app)?;
             let show_item = MenuItemBuilder::with_id("show", "Show Notes").build(app)?;
@@ -249,7 +360,10 @@ pub fn run() {
             show_and_position_window,
             toggle_window_visibility,
             show_settings_window,
-            open_url
+            open_url,
+            append_to_today_note,
+            get_recent_notes,
+            show_quick_capture_window
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

@@ -5,6 +5,35 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.4.0] - 2025-07-09
+
+### Added
+- **Quick Capture Modal**: Spotlight-inspired instant note capture with global shortcut (Cmd+Shift+Space)
+- **48-Hour History**: Quick Capture displays recent notes from the last 48 hours
+- **Multi-Window Architecture**: Support for main window, settings, and Quick Capture modal
+- **Enhanced Global Shortcuts**: Both Cmd+Shift+N (main window) and Cmd+Shift+Space (Quick Capture)
+- **Timestamped Notes**: Quick Capture adds automatic timestamps to entries
+- **Glassmorphism Design**: Beautiful frosted glass effects across all windows
+- **Always On Top**: Quick Capture modal appears above all applications
+
+### Improved
+- **Backend Commands**: Extended Rust API with quick capture and recent notes functionality
+- **Window Management**: Better handling of multiple windows and focus management
+- **User Experience**: Instant input focus, ESC/Enter shortcuts, and smooth animations
+- **Version Display**: Updated version information throughout the application
+
+### Technical
+- **New Entry Points**: Added quick-capture.html and supporting TypeScript files
+- **Vite Configuration**: Multi-entry build system for all windows
+- **Enhanced Styling**: Quick Capture specific CSS with macOS-native feel
+
+## [0.3.0] - 2025-07-09
+
+### Added
+- **Settings Website Link**: Fixed and improved website opening functionality
+- **Enhanced Error Handling**: Better fallback mechanisms for external links
+- **Version Updates**: Consistent versioning across all components
+
 ## [0.2.0] - 2025-07-09
 
 ### Added
