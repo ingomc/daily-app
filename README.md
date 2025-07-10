@@ -1,4 +1,4 @@
-# Daily App v0.6.1
+# Daily App v0.6.2
 
 Eine minimalistische macOS-Menüleisten-App für tägliche Standup-Notizen, gebaut mit Tauri (React + Rust).
 

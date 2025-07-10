@@ -5,6 +5,21 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.6.2] - 2025-07-10
+
+### Fixed
+- **GitHub Actions YAML Syntax**: Resolved critical YAML parsing errors in release workflow
+- **Workflow Reliability**: Fixed JavaScript template literal conflicts with YAML processor
+- **String Construction**: Replaced problematic backtick syntax with array-based approach
+- **CI/CD Stability**: Ensured robust parsing with `.join()` method for multiline strings
+- **Release Automation**: Eliminated all syntax barriers for seamless automated deployments
+
+### Technical Improvements
+- **YAML Compatibility**: Array-based string building prevents parser conflicts
+- **Error Resilience**: Improved error handling in DMG file detection
+- **Code Maintainability**: Cleaner, more readable workflow script structure
+- **Production Readiness**: GitHub Actions workflow now bulletproof for releases
+
 ## [0.6.1] - 2025-07-10
 
 ### Added

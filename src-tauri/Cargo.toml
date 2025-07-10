@@ -1,6 +1,6 @@
 [package]
 name = "tauri-app"
-version = "0.6.1"
+version = "0.6.2"
 description = "Daily Standup Notes - A minimal macOS menu bar app for quick note-taking"
 authors = ["Andre Bellmann <andre@andre-bellmann.de>"]
 edition = "2021"
