@@ -140,8 +140,8 @@ jobs:
 **Build Time**: ${new Date().toISOString()}
 
 ### 📦 Available Downloads:
-- **DMG Installer**: \`${dmgFile}\`
-- **App Bundle**: \`Daily App.app\`
+- **DMG Installer**: \\\`${dmgFile}\\\`
+- **App Bundle**: \\\`Daily App.app\\\`
 
 ### 📥 How to Download:
 1. Go to [Actions tab](${context.payload.repository.html_url}/actions)
