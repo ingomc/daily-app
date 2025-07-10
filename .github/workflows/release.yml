@@ -128,23 +128,34 @@ jobs:
               console.log('Could not read DMG directory:', error.message);
             }
             
-            const buildInfo = "\n\n---\n\n## 🤖 Automated Build Complete!\n\n" +
-              "**Build Status**: ✅ Success  \n" +
-              "**Platform**: macOS (Apple Silicon)  \n" +
-              "**Artifacts**: 2 files uploaded  \n" +
-              "**Build Time**: " + new Date().toISOString() + "\n\n" +
-              "### 📦 Available Downloads:\n" +
-              "- **DMG Installer**: `" + dmgFile + "`\n" +
-              "- **App Bundle**: `Daily App.app`\n\n" +
-              "### 📥 How to Download:\n" +
-              "1. Go to [Actions tab](" + context.payload.repository.html_url + "/actions)\n" +
-              "2. Click on the latest workflow run\n" +
-              "3. Download artifacts from the \"Artifacts\" section\n\n" +
-              "### 🚀 Installation:\n" +
-              "1. Download and mount the DMG file\n" +
-              "2. Drag Daily App.app to Applications folder\n" +
-              "3. Launch from Applications folder\n\n" +
-              "*Built automatically via GitHub Actions* 🤖";
+            const buildInfo = [
+              "",
+              "",
+              "---",
+              "",
+              "## 🤖 Automated Build Complete!",
+              "",
+              "**Build Status**: ✅ Success",
+              "**Platform**: macOS (Apple Silicon)",
+              "**Artifacts**: 2 files uploaded",
+              "**Build Time**: " + new Date().toISOString(),
+              "",
+              "### 📦 Available Downloads:",
+              "- **DMG Installer**: `" + dmgFile + "`",
+              "- **App Bundle**: `Daily App.app`",
+              "",
+              "### 📥 How to Download:",
+              "1. Go to [Actions tab](" + context.payload.repository.html_url + "/actions)",
+              "2. Click on the latest workflow run",
+              "3. Download artifacts from the \"Artifacts\" section",
+              "",
+              "### 🚀 Installation:",
+              "1. Download and mount the DMG file",
+              "2. Drag Daily App.app to Applications folder",
+              "3. Launch from Applications folder",
+              "",
+              "*Built automatically via GitHub Actions* 🤖"
+            ].join("\\n");
             
             // Update the release body with build information
             const currentBody = context.payload.release.body || '';
