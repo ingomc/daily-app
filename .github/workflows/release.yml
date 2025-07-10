@@ -105,7 +105,7 @@ jobs:
           draft: false
           prerelease: false
 
-      - name: Comment on Release (if release event)
+      - name: Update Release with Build Info (if release event)
         if: github.event_name == 'release'
         uses: actions/github-script@v7
         with:
@@ -115,36 +115,55 @@ jobs:
             
             // Find DMG file
             const dmgDir = 'src-tauri/target/release/bundle/dmg';
-            const dmgFiles = fs.readdirSync(dmgDir).filter(f => f.endsWith('.dmg'));
-            const dmgFile = dmgFiles[0] || 'Daily App DMG';
+            let dmgFile = 'Daily App DMG';
             
-            const comment = `## 🎉 Release Build Complete!
+            try {
+              if (fs.existsSync(dmgDir)) {
+                const dmgFiles = fs.readdirSync(dmgDir).filter(f => f.endsWith('.dmg'));
+                if (dmgFiles.length > 0) {
+                  dmgFile = dmgFiles[0];
+                }
+              }
+            } catch (error) {
+              console.log('Could not read DMG directory:', error.message);
+            }
             
-            **Build Status**: ✅ Success  
-            **Platform**: macOS (Apple Silicon)  
-            **Artifacts**: 2 files uploaded
+            const buildInfo = `
+
+---
+
+## 🤖 Automated Build Complete!
+
+**Build Status**: ✅ Success  
+**Platform**: macOS (Apple Silicon)  
+**Artifacts**: 2 files uploaded  
+**Build Time**: ${new Date().toISOString()}
+
+### 📦 Available Downloads:
+- **DMG Installer**: \`${dmgFile}\`
+- **App Bundle**: \`Daily App.app\`
+
+### 📥 How to Download:
+1. Go to [Actions tab](${context.payload.repository.html_url}/actions)
+2. Click on the latest workflow run
+3. Download artifacts from the "Artifacts" section
+
+### 🚀 Installation:
+1. Download and mount the DMG file
+2. Drag Daily App.app to Applications folder
+3. Launch from Applications folder
+
+*Built automatically via GitHub Actions* 🤖`;
             
-            ### 📦 Available Downloads:
-            - **DMG Installer**: \`${dmgFile}\`
-            - **App Bundle**: \`Daily App.app\`
+            // Update the release body with build information
+            const currentBody = context.payload.release.body || '';
+            const updatedBody = currentBody + buildInfo;
             
-            ### 📥 How to Download:
-            1. Go to [Actions tab](${context.payload.repository.html_url}/actions)
-            2. Click on this workflow run
-            3. Download artifacts from the "Artifacts" section
-            
-            ### 🚀 Installation:
-            1. Download and mount the DMG file
-            2. Drag Daily App.app to Applications folder
-            3. Launch from Applications folder
-            
-            *Built automatically via GitHub Actions* 🤖`;
-            
-            github.rest.repos.createReleaseComment({
+            await github.rest.repos.updateRelease({
               owner: context.repo.owner,
               repo: context.repo.repo,
               release_id: context.payload.release.id,
-              body: comment
+              body: updatedBody
             });
 
       - name: Build Summary
